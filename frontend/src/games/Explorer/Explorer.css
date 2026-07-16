@@ -1,0 +1,54 @@
+.explorer {
+  padding-bottom: 4rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  align-items: baseline;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.35rem 0.2rem;
+  border: none;
+  border-bottom: 1.5px solid var(--ink);
+  border-radius: 0;
+  font-size: 1.15rem;
+  font-family: var(--serif);
+  background: transparent;
+  color: var(--ink);
+}
+
+.search-input:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+.search-input::placeholder {
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+.explore-error {
+  font-style: italic;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.dictionary-entry {
+  text-align: left;
+}
+
+.dictionary-entry .entry-headword {
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.3rem;
+}
+
+.dictionary-entry .relation-entry {
+  font-size: 1.05rem;
+  line-height: 175%;
+  margin: 0.5rem 0;
+}

@@ -1,0 +1,415 @@
+:root {
+  --paper: #ffffff;
+  --ink: #1c1a17;
+  --ink-soft: #57514a;
+  --ink-faint: #948c82;
+  --rule: #d8d2c8;
+  --highlight: #fdf6e3;
+  --accent: #8b2500;
+
+  --serif: 'EB Garamond', Garamond, Georgia, 'Times New Roman', serif;
+
+  font: 19px/1.5 var(--serif);
+  color: var(--ink);
+  background: var(--paper);
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+}
+
+#root {
+  max-width: 680px;
+  margin: 0 auto;
+  min-height: 100svh;
+  box-sizing: border-box;
+  padding: 0 1.25rem;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: var(--serif);
+  color: var(--ink);
+}
+
+/* ---------- Masthead ---------- */
+
+.masthead {
+  text-align: center;
+  padding-top: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.headword-title {
+  font-size: 2.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  margin: 0;
+  color: var(--ink);
+}
+
+.headword-title .syllable-dot {
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+.pronunciation {
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+}
+
+.pronunciation .pos {
+  font-style: italic;
+}
+
+.tagline {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-faint);
+  margin-top: 0.1rem;
+}
+
+.masthead-rule {
+  border: none;
+  border-top: 1px solid var(--ink);
+  border-bottom: 3px double var(--rule);
+  height: 3px;
+  margin: 1.25rem 0 0;
+}
+
+/* ---------- Tabs ---------- */
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin: 0.9rem 0 2rem;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.1rem 0;
+  font-size: 0.85rem;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  color: var(--ink);
+}
+
+.tab-btn.active {
+  color: var(--ink);
+  border-bottom: 2px solid var(--accent);
+}
+
+/* ---------- Shared dictionary-entry pieces ---------- */
+
+.entry-headword {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.relation-label {
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-right: 0.45rem;
+}
+
+.word-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  border-bottom: 1px dotted var(--ink-faint);
+}
+
+.word-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--highlight);
+}
+
+.entry-sep {
+  color: var(--ink-faint);
+}
+
+/* Hand-sketched box for real buttons */
+.sketch-btn {
+  background: var(--paper);
+  font-size: 0.95rem;
+  padding: 0.3rem 1rem;
+  cursor: pointer;
+  border: 1.5px solid var(--ink);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.sketch-btn:hover {
+  background: var(--highlight);
+}
+
+.sketch-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---------- Word Chain game ---------- */
+
+.game {
+  text-align: center;
+  padding-bottom: 4rem;
+}
+
+.mode-switcher {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.mode-btn {
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  cursor: pointer;
+  padding: 0.1rem 0.5rem;
+}
+
+.mode-btn:hover { color: var(--ink); }
+
+.mode-btn.active {
+  color: var(--ink);
+  border-bottom: 2px solid var(--accent);
+}
+
+.help-btn {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.4rem;
+  height: 1.4rem;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+  line-height: 1;
+  margin-left: 0.5rem;
+}
+
+.help-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+.how-to-play {
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  background: var(--highlight);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0.75rem 1rem 0.75rem 1.75rem;
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+.how-to-play li + li { margin-top: 0.3rem; }
+
+.daily-date {
+  font-style: normal;
+  color: var(--ink-faint);
+}
+
+.step-counter {
+  font-style: normal;
+  color: var(--ink);
+}
+
+.targets {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 1.5rem 0 0.25rem;
+}
+
+.targets .word {
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+.targets .arrow {
+  color: var(--ink-faint);
+  font-size: 1.2rem;
+}
+
+.puzzle-hint {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin: 0.4rem 0 1.25rem;
+}
+
+.conceptual-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  margin-bottom: 1rem;
+  user-select: none;
+}
+
+.chain {
+  font-size: 1.1rem;
+  margin: 1rem auto;
+  padding: 0.6rem 1rem;
+  min-height: 1.6rem;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.chain-word {
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-size: inherit;
+  padding: 0;
+}
+
+.chain-word--current {
+  font-weight: 700;
+  cursor: default;
+  color: var(--ink);
+}
+
+.chain-word--past {
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-bottom: 1px dotted var(--ink-faint);
+}
+
+.chain-word--past:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.chain-arrow {
+  color: var(--ink-faint);
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+/* ---------- Footer ---------- */
+
+.powered-by {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2rem 0 3rem;
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+}
+
+.powered-by-label {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--ink-faint);
+  letter-spacing: 0.03em;
+}
+
+.powered-by-link {
+  display: flex;
+  align-items: center;
+}
+
+.powered-by-logo {
+  height: 48px;
+  width: auto;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.powered-by-logo:hover {
+  opacity: 1;
+}
+
+/* ---------- Synset block (definition + relations per sense) ---------- */
+
+.synset-block {
+  text-align: left;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.synset-block:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.synset-def {
+  font-size: 1rem;
+  line-height: 160%;
+  margin-bottom: 0.45rem;
+  color: var(--ink);
+}
+
+.sense-pos {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.sense-example {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.relation-section {
+  margin-top: 1.1rem;
+  text-align: left;
+}
+
+.relation-entry {
+  font-size: 1.05rem;
+  line-height: 175%;
+}
+
+.result {
+  margin-top: 2rem;
+  font-size: 1.15rem;
+}
+
+.result .note {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.new-puzzle-btn {
+  margin-top: 1.25rem;
+}
