@@ -17,7 +17,7 @@ services:
       - "127.0.0.1:7474:7474"   # browser — localhost only
       - "127.0.0.1:7687:7687"   # bolt — localhost only
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD}", "RETURN 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 20
