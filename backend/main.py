@@ -19,7 +19,9 @@ app = FastAPI(title="Syonym API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", 
+    # "https://localhost:3000" # TODO: add this back in when we have a production environment
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
