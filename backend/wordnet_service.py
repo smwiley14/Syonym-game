@@ -17,37 +17,28 @@ def is_common(word: str, min_zipf: float = NEIGHBOR_MIN_ZIPF) -> bool:
 
 
 # --- Full relation sets (Explorer tab) ---
-SYNSET_RELS = "|".join(
-    f"ns3__{r}"
-    for r in [
-        "also", "attribute", "causes", "is_caused_by",
-        "domain_region", "has_domain_region", "domain_topic", "has_domain_topic",
-        "entails", "is_entailed_by", "exemplifies", "is_exemplified_by",
-        "holo_member", "holo_part", "holo_substance",
-        "mero_member", "mero_part", "mero_substance",
-        "hypernym", "hyponym", "instance_hypernym", "instance_hyponym",
-        "similar",
-    ]
-)
-SENSE_RELS = "|".join(
-    f"ns3__{r}" for r in ["antonym", "derivation", "participle", "pertainym", "other"]
-)
+SYNSET_RELS = "|".join([
+    "also", "attribute", "causes", "is_caused_by",
+    "domain_region", "has_domain_region", "domain_topic", "has_domain_topic",
+    "entails", "is_entailed_by", "exemplifies", "is_exemplified_by",
+    "holo_member", "holo_part", "holo_substance",
+    "mero_member", "mero_part", "mero_substance",
+    "hypernym", "hyponym", "instance_hypernym", "instance_hyponym",
+    "similar",
+])
+SENSE_RELS = "|".join(["antonym", "derivation", "participle", "pertainym", "other"])
 
 # --- Restricted relation sets (Word Chain game) ---
 # Only the intuitive "next word" hops that players recognise without a
 # linguistics background.  Hypernym/hyponym give up-down hierarchy,
 # similar/also give sideways adjective links; antonym and derivation give
 # cross-POS hops.
-GAME_SYNSET_RELS = "|".join(
-    f"ns3__{r}" for r in [
-        "hypernym", "hyponym", "similar", "also",
-        "mero_part", "mero_member", "mero_substance",
-        "holo_part", "holo_member", "holo_substance",
-    ]
-)
-GAME_SENSE_RELS = "|".join(
-    f"ns3__{r}" for r in ["antonym", "derivation"]
-)
+GAME_SYNSET_RELS = "|".join([
+    "hypernym", "hyponym", "similar", "also",
+    "mero_part", "mero_member", "mero_substance",
+    "holo_part", "holo_member", "holo_substance",
+])
+GAME_SENSE_RELS = "|".join(["antonym", "derivation"])
 
 # --- ConceptNet relations included in conceptual game mode ---
 CN_GAME_RELS = {
@@ -62,96 +53,92 @@ WHERE r.type IN $rels AND NOT b.term CONTAINS '_'
 RETURN w AS word, b.term AS neighbor, r.type AS rel, r.weight AS weight
 """
 
-# NOTE: This DB was imported with n10s handleMultival=ARRAY, so every RDF
-# literal/IRI-valued property is stored as a Neo4j list rather than a scalar.
-# Matching uses {prop: [param]} (array equality) so the range index is used,
-# and head() unwraps single-element lists for output values.
 
 NEIGHBORS_QUERY = f"""
 UNWIND $words AS w
-MATCH (form:Resource {{ns2__writtenRep: [w]}})
-USING INDEX form:Resource(ns2__writtenRep)
-MATCH (word:Resource)-[:ns2__canonicalForm]->(form)
-MATCH (word)-[:ns2__sense]->(sense)-[:ns2__isLexicalizedSenseOf]->(synset)
+MATCH (form:Resource {{writtenRep: [w]}})
+USING INDEX form:Resource(writtenRep)
+MATCH (word:Resource)-[:canonicalForm]->(form)
+MATCH (word)-[:sense]->(sense)-[:isLexicalizedSenseOf]->(synset)
 CALL (sense, synset) {{
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(synset)
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(synset)
   WHERE nbr_sense <> sense
   RETURN nbr_sense, 'synonym' AS rel
   UNION ALL
   MATCH (synset)-[r:{SYNSET_RELS}]->(other_synset)
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(other_synset)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(other_synset)
+  RETURN nbr_sense, TYPE(r) AS rel
   UNION ALL
   MATCH (sense)-[r:{SENSE_RELS}]->(nbr_sense)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  RETURN nbr_sense, TYPE(r) AS rel
 }}
-MATCH (nbr_sense)<-[:ns2__sense]-(nbr_word)-[:ns2__canonicalForm]->(nbr_form)
-WITH w, head(nbr_form.ns2__writtenRep) AS neighbor, COLLECT(DISTINCT rel) AS rels
+MATCH (nbr_sense)<-[:sense]-(nbr_word)-[:canonicalForm]->(nbr_form)
+WITH w, head(nbr_form.writtenRep) AS neighbor, COLLECT(DISTINCT rel) AS rels
 WHERE neighbor IS NOT NULL AND neighbor <> w
 RETURN w AS word, COLLECT({{word: neighbor, relations: rels}}) AS neighbors
 """
 
 GAME_NEIGHBORS_QUERY = f"""
 UNWIND $words AS w
-MATCH (form:Resource {{ns2__writtenRep: [w]}})
-USING INDEX form:Resource(ns2__writtenRep)
-MATCH (word:Resource)-[:ns2__canonicalForm]->(form)
-MATCH (word)-[:ns2__sense]->(sense)-[:ns2__isLexicalizedSenseOf]->(synset)
+MATCH (form:Resource {{writtenRep: [w]}})
+USING INDEX form:Resource(writtenRep)
+MATCH (word:Resource)-[:canonicalForm]->(form)
+MATCH (word)-[:sense]->(sense)-[:isLexicalizedSenseOf]->(synset)
 CALL (sense, synset) {{
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(synset)
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(synset)
   WHERE nbr_sense <> sense
   RETURN nbr_sense, 'synonym' AS rel
   UNION ALL
   MATCH (synset)-[r:{GAME_SYNSET_RELS}]->(other_synset)
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(other_synset)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(other_synset)
+  RETURN nbr_sense, TYPE(r) AS rel
   UNION ALL
   MATCH (sense)-[r:{GAME_SENSE_RELS}]->(nbr_sense)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  RETURN nbr_sense, TYPE(r) AS rel
 }}
-MATCH (nbr_sense)<-[:ns2__sense]-(nbr_word)-[:ns2__canonicalForm]->(nbr_form)
-WITH w, head(nbr_form.ns2__writtenRep) AS neighbor, COLLECT(DISTINCT rel) AS rels
+MATCH (nbr_sense)<-[:sense]-(nbr_word)-[:canonicalForm]->(nbr_form)
+WITH w, head(nbr_form.writtenRep) AS neighbor, COLLECT(DISTINCT rel) AS rels
 WHERE neighbor IS NOT NULL AND neighbor <> w
 RETURN w AS word, COLLECT({{word: neighbor, relations: rels}}) AS neighbors
 """
 
 SENSES_QUERY = """
-MATCH (form:Resource {ns2__writtenRep: [$word]})
-USING INDEX form:Resource(ns2__writtenRep)
-MATCH (word:Resource)-[:ns2__canonicalForm]->(form)
-MATCH (word)-[:ns2__sense]->(sense)-[:ns2__isLexicalizedSenseOf]->(synset)
-OPTIONAL MATCH (synset)-[:ns3__definition]->(def)
-OPTIONAL MATCH (synset)-[:ns3__example]->(ex)
+MATCH (form:Resource {writtenRep: [$word]})
+USING INDEX form:Resource(writtenRep)
+MATCH (word:Resource)-[:canonicalForm]->(form)
+MATCH (word)-[:sense]->(sense)-[:isLexicalizedSenseOf]->(synset)
+OPTIONAL MATCH (synset)-[:definition]->(def)
+OPTIONAL MATCH (synset)-[:example]->(ex)
 RETURN DISTINCT synset.uri AS synset_uri,
-       head(def.rdf__value) AS definition,
-       COLLECT(DISTINCT head(ex.rdf__value)) AS examples
+       head(def.value) AS definition,
+       COLLECT(DISTINCT head(ex.value)) AS examples
 """
 
 SYNSET_NEIGHBORS_QUERY = f"""
-MATCH (form:Resource {{ns2__writtenRep: [$word]}})
-USING INDEX form:Resource(ns2__writtenRep)
-MATCH (wordnode:Resource)-[:ns2__canonicalForm]->(form)
-MATCH (wordnode)-[:ns2__sense]->(sense)-[:ns2__isLexicalizedSenseOf]->(synset)
-OPTIONAL MATCH (synset)-[:ns3__definition]->(def_node)
-OPTIONAL MATCH (synset)-[:ns3__example]->(ex_node)
+MATCH (form:Resource {{writtenRep: [$word]}})
+USING INDEX form:Resource(writtenRep)
+MATCH (wordnode:Resource)-[:canonicalForm]->(form)
+MATCH (wordnode)-[:sense]->(sense)-[:isLexicalizedSenseOf]->(synset)
+OPTIONAL MATCH (synset)-[:definition]->(def_node)
+OPTIONAL MATCH (synset)-[:example]->(ex_node)
 WITH sense, synset,
-     head(def_node.rdf__value) AS definition,
-     COLLECT(DISTINCT head(ex_node.rdf__value)) AS examples
+     head(def_node.value) AS definition,
+     COLLECT(DISTINCT head(ex_node.value)) AS examples
 CALL (sense, synset) {{
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(synset)
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(synset)
   WHERE nbr_sense <> sense
   RETURN nbr_sense, 'synonym' AS rel
   UNION ALL
   MATCH (synset)-[r:{SYNSET_RELS}]->(other_synset)
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(other_synset)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(other_synset)
+  RETURN nbr_sense, TYPE(r) AS rel
   UNION ALL
   MATCH (sense)-[r:{SENSE_RELS}]->(nbr_sense)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  RETURN nbr_sense, TYPE(r) AS rel
 }}
-MATCH (nbr_sense)<-[:ns2__sense]-(nbr_word)-[:ns2__canonicalForm]->(nbr_form)
+MATCH (nbr_sense)<-[:sense]-(nbr_word)-[:canonicalForm]->(nbr_form)
 WITH synset, definition, examples,
-     head(nbr_form.ns2__writtenRep) AS neighbor,
+     head(nbr_form.writtenRep) AS neighbor,
      COLLECT(DISTINCT rel) AS rels
 WHERE neighbor IS NOT NULL AND neighbor <> $word
 WITH synset.uri AS synset_uri, definition, examples,
@@ -161,30 +148,30 @@ ORDER BY synset_uri
 """
 
 GAME_SYNSET_NEIGHBORS_QUERY = f"""
-MATCH (form:Resource {{ns2__writtenRep: [$word]}})
-USING INDEX form:Resource(ns2__writtenRep)
-MATCH (wordnode:Resource)-[:ns2__canonicalForm]->(form)
-MATCH (wordnode)-[:ns2__sense]->(sense)-[:ns2__isLexicalizedSenseOf]->(synset)
-OPTIONAL MATCH (synset)-[:ns3__definition]->(def_node)
-OPTIONAL MATCH (synset)-[:ns3__example]->(ex_node)
+MATCH (form:Resource {{writtenRep: [$word]}})
+USING INDEX form:Resource(writtenRep)
+MATCH (wordnode:Resource)-[:canonicalForm]->(form)
+MATCH (wordnode)-[:sense]->(sense)-[:isLexicalizedSenseOf]->(synset)
+OPTIONAL MATCH (synset)-[:definition]->(def_node)
+OPTIONAL MATCH (synset)-[:example]->(ex_node)
 WITH sense, synset,
-     head(def_node.rdf__value) AS definition,
-     COLLECT(DISTINCT head(ex_node.rdf__value)) AS examples
+     head(def_node.value) AS definition,
+     COLLECT(DISTINCT head(ex_node.value)) AS examples
 CALL (sense, synset) {{
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(synset)
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(synset)
   WHERE nbr_sense <> sense
   RETURN nbr_sense, 'synonym' AS rel
   UNION ALL
   MATCH (synset)-[r:{GAME_SYNSET_RELS}]->(other_synset)
-  MATCH (nbr_sense)-[:ns2__isLexicalizedSenseOf]->(other_synset)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  MATCH (nbr_sense)-[:isLexicalizedSenseOf]->(other_synset)
+  RETURN nbr_sense, TYPE(r) AS rel
   UNION ALL
   MATCH (sense)-[r:{GAME_SENSE_RELS}]->(nbr_sense)
-  RETURN nbr_sense, replace(TYPE(r), 'ns3__', '') AS rel
+  RETURN nbr_sense, TYPE(r) AS rel
 }}
-MATCH (nbr_sense)<-[:ns2__sense]-(nbr_word)-[:ns2__canonicalForm]->(nbr_form)
+MATCH (nbr_sense)<-[:sense]-(nbr_word)-[:canonicalForm]->(nbr_form)
 WITH synset, definition, examples,
-     head(nbr_form.ns2__writtenRep) AS neighbor,
+     head(nbr_form.writtenRep) AS neighbor,
      COLLECT(DISTINCT rel) AS rels
 WHERE neighbor IS NOT NULL AND neighbor <> $word
 WITH synset.uri AS synset_uri, definition, examples,
@@ -198,8 +185,8 @@ POS_LABELS = {
 }
 
 RANDOM_WORDS_QUERY = """
-MATCH (:Resource)-[:ns2__canonicalForm]->(form)
-WITH DISTINCT head(form.ns2__writtenRep) AS w
+MATCH (:Resource)-[:canonicalForm]->(form)
+WITH DISTINCT head(form.writtenRep) AS w
 WHERE w IS NOT NULL AND NOT w CONTAINS ' '
 RETURN w ORDER BY rand() LIMIT $n
 """
@@ -210,7 +197,7 @@ def ensure_index() -> None:
     with driver.session() as session:
         session.run(
             "CREATE INDEX resource_written_rep IF NOT EXISTS "
-            "FOR (n:Resource) ON (n.ns2__writtenRep)"
+            "FOR (n:Resource) ON (n.writtenRep)"
         )
 
 
