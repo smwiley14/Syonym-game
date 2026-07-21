@@ -1,1 +1,1 @@
-# Syonym-game
+# Synonym-game
